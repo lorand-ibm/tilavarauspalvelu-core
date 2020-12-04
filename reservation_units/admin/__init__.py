@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import (
+from ..models import (
     Day,
     DayPart,
     Period,
@@ -9,11 +9,13 @@ from .models import (
     ReservationUnitImage,
     ReservationUnitType,
 )
+from .period_inline import PeriodInline
 
 
 @admin.register(ReservationUnit)
 class ReservationUnitAdmin(admin.ModelAdmin):
     model = ReservationUnit
+    inlines = [PeriodInline]
 
 
 @admin.register(ReservationUnitImage)

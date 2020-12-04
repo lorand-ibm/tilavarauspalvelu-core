@@ -9,9 +9,23 @@ class LocationInline(admin.TabularInline):
     fields = ["address_street", "address_zip", "address_city"]
 
 
+class DistrictInline(admin.TabularInline):
+    model = District
+
+
+class SpaceInline(admin.TabularInline):
+    model = Space
+
+
 @admin.register(District)
 class DistrictAdmin(MPTTModelAdmin):
     model = District
+    inlines = [DistrictInline]
+
+
+@admin.register(RealEstate)
+class RealEstateAdmin(admin.ModelAdmin):
+    model = RealEstate
 
 
 @admin.register(RealEstate)
@@ -29,4 +43,4 @@ class BuildingAdmin(admin.ModelAdmin):
 @admin.register(Space)
 class SpaceAdmin(MPTTModelAdmin):
     model = Space
-    inlines = [LocationInline]
+    inlines = [LocationInline, SpaceInline]

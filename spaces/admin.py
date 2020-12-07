@@ -26,11 +26,6 @@ class DistrictAdmin(MPTTModelAdmin):
 @admin.register(RealEstate)
 class RealEstateAdmin(admin.ModelAdmin):
     model = RealEstate
-
-
-@admin.register(RealEstate)
-class RealEstateAdmin(admin.ModelAdmin):
-    model = RealEstate
     inlines = [LocationInline]
 
 

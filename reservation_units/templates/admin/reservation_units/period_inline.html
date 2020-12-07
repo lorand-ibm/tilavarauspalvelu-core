@@ -66,27 +66,17 @@
         var $emptyTemplate = $group.find("#" + prefix + "-empty");
         var $totalForms = $group.find("#id_" + prefix + "-TOTAL_FORMS");
         $totalForms.attr("autocomplete", "off");
+
         function recalculateTotalForms() {
             var n = $group.find(".grp-dynamic-form").not(".grp-empty-form").length;
             $totalForms.val(n);
             return n;
         }
 
-        function reinitDateTimeFields(form) {
-            form.find(".vDateField").datepicker({
-                constrainInput: false,
-                showOn: 'button',
-                buttonImageOnly: false,
-                buttonText: '',
-                dateFormat: '%Y-%m-%d'
-            });
-        }
-
         $group.on("click", ".grp-add-handler", function() {
             var newIndex = parseInt(recalculateTotalForms(), 10); // This is _not_ adding +1 to the count because zero-based indexing
             var $newForm = $($emptyTemplate.prop("outerHTML").replace(/(__prefix__|-empty)/g, newIndex));
             $group.find(".grp-dynamic-form:last").after($newForm);
-            reinitDateTimeFields($newForm);
             $totalForms.val(recalculateTotalForms());
         });
         $group.on("click", ".grp-delete-handler", function() {

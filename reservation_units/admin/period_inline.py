@@ -95,7 +95,7 @@ class PeriodModelForm(forms.ModelForm):
         def save_days():
             for wd, helper in self.day_fields.items():
                 helper.save(period=self.instance)
-            self.instance.save_closedness()
+            #self.instance.save_closedness()
 
         if commit:
             save_days()

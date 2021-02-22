@@ -114,7 +114,7 @@ Pertti on nuorison vakiovuorohakemusten käsittelijä, jonka vastuulla on jakaa 
 ### Priorisointikorien jakaminen
 * Koreihin poimitaan hakemukset joiden
     * Ikäryhmä, käyttötarkoitus ja organisaation kotipaikka vastaa korille määriteltyjä ikäryhmiä, käyttötarkoituksia ja kotipaikkakuntaa
-        * Jos korille ei ole määritelty jotain tai kaikkia näitä ominaisuuksia, saa vastaava avo hakemuksella olla tyhjä tai mikä tahansa arvo
+        * Jos korille ei ole määritelty jotain tai kaikkia näitä ominaisuuksia, saa vastaava arvo hakemuksella olla tyhjä tai mikä tahansa arvo
         * Esim. jos korille ei ole määritelty käyttötarkoitusta, voi hakemuksella määritelty käyttötarkoitus olla mikä tahansa.
 * Hakemus voi kuulua kriteereiden puolesta useampaan kuin yhteen koriin   
 * Kun käynnistetään algoritmi koko hakukierrokselle

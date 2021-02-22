@@ -1,3 +1,68 @@
+#Feature: Hakukierros
+
+## Hakukierroksen korit
+
+##Yleiskatsaus:
+
+##Ongelma:
+
+Nykyään tiloja jaetaan prosessilla, jossa tilojen hakukriteerit eivät ole selkeästi etukäteen määritelty
+ja päätöksentekoprosessi ei ole läpinäkyvä. Tämä voi johtaa siihen, että vuorojen jakoa 
+ei koeta oikeudenmukaiseksi. 
+ 
+##Tavoite:
+* Läpinäkyvyyden lisääminen, oikeudenmukaisuuden kokemuksen lisääntyminen
+* hakukriteerit ja kiintiöt ovat avoimesti tiedossa
+
+##Personat:
+
+Heikki on nuorison palvelukokonaisuuden työntekijä,
+joka toimii tilavarauspalvelun pääkäyttäjänä.
+Heikillä on laajat oikeudet syöttää järjestelmään tilojen tietoja,
+muokata hakukierrosten arviointikriteerejä ym.
+
+##Käyttökokemus:
+
+* Olettaen että järjestelmästä järjestelmässä on nuorison hakukierros keväälle 2021,
+jonka haettavien vuorojen aikaväli on 1.3.2021-1.5.2021 ja hakuaika päättyy 1.2.2021
+    * Kun Heikki katsoo hakukierroksen tietoja
+        * Hän näkee että hakukierroksella on "Muut hakemukset" kori, jonka ehtoja ei pystyy muuttamaan
+    * Kun Heikki valitsee "Luo uusi kori"
+    * Ja syöttää Korin nimeksi "Helsinkiläisten lasten ja nuorten seurat"
+    * Ja valitsee asiakastyypiksi "Yhdistys tai seura"
+    * Ja valitsee organisaation kotipaikkakunnaksi "Helsinki"
+    * Ja valitsee ikäryhmäksi "5-10 vuotiaat" ja 11-15 vuotiaat
+        * Hän näkee, hakemuskierroksella korin "Helsinkiläisten lasten ja nuorten seurat"
+        * Ja näkee, että "Helsinkiläisten lasten ja nuorten seurat" kori on "Muut hakemukset" korin yläpuolella
+    * Kun Heikki valitsee "Luo uusi kori"
+    * Ja syöttää Korin nimeksi "Muut seurat"
+    * Ja valitsee asiakastyypiksi "Yhdistys tai seura"
+        * Hän näkee, hakemuskierroksella korit "Helsinkiläisten lasten ja nuorten seurat", "Muut seurat" 
+        * Ja näkee, että "Muut hakemukset" kori on järjestyksessä viimeisenä
+
+##Vaatimukset:
+
+| Ominaisuus                      | Huomioita                                                                                        |
+|---------------------------------|--------------------------------------------------------------------------------------------------|
+| Nimi                            | Pakollinen                                                                                       |
+| Järjestysnumero                 | Pakollinen, muodostuu korien järjestyksestä käyttöliittymällä                                    |
+| Asiakastyyppi                   | Valinnainen, monivalinta. Vaihtoehdot asiakastyyppien arvoista                                   |
+| Ikäryhmät                       | Valinnainen, monivalinta. Valitaan määritellyistä ikäryhmistä                                    |
+| Kotipaikkakunta                 | Valinnainen. Vain yksi valinta, valitaan määritellyista paikkakunnista.                          |
+| Toiminnan tyyppi                | Valinnainen. Valitaan toiminnan tyypeistä                                                        |
+| Tavoiteprosentti * Ei pilotissa | Valinnainen. Monivalinta. Valitaan määritellyistä käyttäjäryhmistä.   esim. tasoryhmät           |
+| Käyttäjäryhmä * Ei pilotissa    | Valinnainen. Hakukierroksen kaikkien korien tavoiteprosenttien summan tulee olla korkeintaan 100 |
+
+##Avoimet kysymykset:
+* Ei koske pilottia
+    * Tarvitaanko erilliset käsitteet pririteettikoreille, jossa järjestysnumerolla on vaikutus siihen,
+mihin koriin kuuluville hakemuksille jaetaan vuoroja ensimmäisenä. Näillä koreilla ei ole tavoiteprosenttia 
+    * Ja allokointikoreille, joilla on tavoiteprosentti ja korien järjestyksellä ei ole väliä(?)
+    * Näiden jakaminen vaatii hiukan erilaisen lähestymistavan algoritmissa, koska tavoiteprosentti saa ylittyä,
+    joten sitä ei voi käsitellä maksimina, jollaisena sitä pitäisi käsitellä jos koreja käynnistetään yksi kerrallaan. 
+    Tai ainakin se vaatisi sen, että prosenttia käsitellään maksimina silloin kuin käynnistetään kori tai koreja kerraallaan
+    ja tavoitteena, joka voi ylittyä, silloin kuin käynnistetään koko hakukierroksen vuorojako.
+
 #Feature: Hakukierroksen korien allokointi
 
 ##Yleiskatsaus:

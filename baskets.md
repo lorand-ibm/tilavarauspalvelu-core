@@ -1,16 +1,16 @@
-#Feature: Hakukierros
+#Feature: Hakukierros#
 
-## Hakukierroksen korit
+## Hakukierroksen korit##
 
-##Yleiskatsaus:
+##Yleiskatsaus:##
 
-##Ongelma:
+##Ongelma:##
 
 Nykyään tiloja jaetaan prosessilla, jossa tilojen hakukriteerit eivät ole selkeästi etukäteen määritelty
 ja päätöksentekoprosessi ei ole läpinäkyvä. Tämä voi johtaa siihen, että vuorojen jakoa 
 ei koeta oikeudenmukaiseksi. 
 
-##Tavoite:
+##Tavoite: ##
 * Läpinäkyvyyden lisääminen, oikeudenmukaisuuden kokemuksen lisääntyminen
 * hakukriteerit ja kiintiöt ovat avoimesti tiedossa
 

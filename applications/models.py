@@ -730,9 +730,7 @@ class EventOccurrence(object):
         self.occurrences = occurrences
 
 
-class ApplicationEventSchedule(models.Model):
-
-    DATE_CHOISES = (
+DATE_CHOISES = (
         (0, _("Monday")),
         (1, _("Tuesday")),
         (2, _("Wednesday")),
@@ -741,6 +739,10 @@ class ApplicationEventSchedule(models.Model):
         (5, _("Saturday")),
         (6, _("Sunday")),
     )
+
+
+class ApplicationEventSchedule(models.Model):
+
     day = models.IntegerField(verbose_name=_("Day"), choices=DATE_CHOISES, null=False)
 
     begin = models.TimeField(
@@ -822,4 +824,41 @@ class Recurrence(models.Model):
         blank=False,
         on_delete=models.CASCADE,
         related_name="recurrences",
+    )
+
+
+class ApplicationEventResult(ApplicationEvent):
+    num_allocated_events_per_week = models.PositiveIntegerField()
+
+    def get_num_allocated_events_per_week(self):
+        return len(self.application_event_schedule_results.all())
+
+
+class ApplicationEventScheduleResult(ApplicationEventSchedule):
+    allocated_duration = models.DurationField()
+    day = models.IntegerField(verbose_name=_("Day"), choices=DATE_CHOISES, null=False)
+
+    begin = models.TimeField(
+        verbose_name=_("Start"),
+        null=False,
+        blank=False,
+    )
+
+    end = models.TimeField(
+        verbose_name=_("End"),
+        null=False,
+        blank=False,
+    )
+
+    application_event = models.ForeignKey(
+        ApplicationEventResult,
+        null=False,
+        blank=False,
+        on_delete=models.CASCADE,
+        related_name="application_event_schedule_results",
+    )
+    recurrence = models.RecurrenceField(
+        begin,
+        end,
+        exdates=[]
     )

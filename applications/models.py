@@ -828,37 +828,45 @@ class Recurrence(models.Model):
 
 
 class ApplicationEventResult(ApplicationEvent):
-    num_allocated_events_per_week = models.PositiveIntegerField()
+    application_event_ptr = models.OneToOneField(
+        ApplicationEvent, on_delete=models.CASCADE,
+        parent_link=True,
+        primary_key=True,
+    )
 
     def get_num_allocated_events_per_week(self):
         return len(self.application_event_schedule_results.all())
 
+    def is_fully_allocated(self) -> bool:
+        return self.get_num_allocated_events() == self.events_per_week
+
 
 class ApplicationEventScheduleResult(ApplicationEventSchedule):
-    allocated_duration = models.DurationField()
-    day = models.IntegerField(verbose_name=_("Day"), choices=DATE_CHOISES, null=False)
+    application_event_schedule_ptr = models.OneToOneField(
+        ApplicationEventSchedule, on_delete=models.CASCADE,
+        parent_link=True,
+        primary_key=True,
+    )
 
-    begin = models.TimeField(
+    allocated_duration = models.DurationField()
+    allocated_day = models.IntegerField(verbose_name=_("Day"), choices=DATE_CHOISES, null=False)
+
+    allocated_begin = models.TimeField(
         verbose_name=_("Start"),
         null=False,
         blank=False,
     )
 
-    end = models.TimeField(
+    allocated_end = models.TimeField(
         verbose_name=_("End"),
         null=False,
         blank=False,
     )
 
-    application_event = models.ForeignKey(
+    application_event_result = models.ForeignKey(
         ApplicationEventResult,
         null=False,
         blank=False,
         on_delete=models.CASCADE,
         related_name="application_event_schedule_results",
-    )
-    recurrence = models.RecurrenceField(
-        begin,
-        end,
-        exdates=[]
     )

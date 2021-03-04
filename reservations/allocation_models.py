@@ -154,3 +154,36 @@ class AllocationData(object):
         self.spaces = spaces
         self.baskets = baskets
         self.output_basket_ids = output_basket_ids
+
+
+class AllocatedEvent(object):
+    def __init__(
+        self,
+        space: AllocationSpace,
+        event: AllocationEvent,
+        duration: int,
+        occurrence_id: int,
+        event_id: int,
+        start: int,
+        end: int,
+        basket: AllocationBasket,
+    ):
+        self.space_id = space.id
+        self.event_id = event.id
+        self.duration = datetime.timedelta(minutes=duration * ALLOCATION_PRECISION)
+        self.occurrence_id = occurrence_id
+        self.begin = start
+        self.end = end
+        self.basket_id = basket.id
+        self.event_id = event_id
+
+    def __str__(self):
+        return "{} {} {} {} {} {} {}".format(
+            self.space_id,
+            self.event_id,
+            self.duration,
+            self.occurrence_id,
+            self.begin,
+            self.end,
+            self.basket_id,
+        )

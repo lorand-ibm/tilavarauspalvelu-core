@@ -22,6 +22,10 @@ def time_delta_to_integer_with_precision(delta: datetime.timedelta):
     return math.ceil(delta.total_seconds() / 60 / ALLOCATION_PRECISION)
 
 
+def integet_to_time_from_precision(integer_time: int):
+    return datetime.time.min() + integer_time * ALLOCATION_PRECISION
+
+
 class AllocationSpace(object):
     def __init__(
         self,
@@ -164,8 +168,8 @@ class AllocatedEvent(object):
         duration: int,
         occurrence_id: int,
         event_id: int,
-        start: int,
-        end: int,
+        start: datetime.time,
+        end: datetime.time,
         basket: AllocationBasket,
     ):
         self.space_id = space.id

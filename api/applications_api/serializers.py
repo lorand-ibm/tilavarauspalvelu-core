@@ -20,7 +20,7 @@ from applications.models import (
     EventReservationUnit,
     Organisation,
     Person,
-    Recurrence,
+    Recurrence, ApplicationEventScheduleStatus,
 )
 from reservation_units.models import Purpose, ReservationUnit
 from reservations.models import AbilityGroup, AgeGroup
@@ -141,9 +141,14 @@ class ApplicationEventScheduleSerializer(serializers.ModelSerializer):
 
     id = serializers.IntegerField(allow_null=True, required=False)
 
+    status = serializers.ChoiceField(
+        help_text="Status of this application event",
+        choices=ApplicationEventScheduleStatus.STATUS_CHOICES,
+    )
+
     class Meta:
         model = ApplicationEventSchedule
-        fields = ["id", "day", "begin", "end"]
+        fields = ["id", "day", "begin", "end", "status"]
         extra_kwargs = {
             "day": {
                 "help_text": "Day of requested reservation allocation time slot for event represented as number. "

@@ -7,7 +7,7 @@ from .models import (
     ApplicationEventStatus,
     ApplicationRound,
     ApplicationRoundStatus,
-    ApplicationStatus,
+    ApplicationStatus, ApplicationEventSchedule, ApplicationEventScheduleStatus,
 )
 
 
@@ -44,6 +44,20 @@ def create_application_event_status(sender, instance, **kwargs):
     if kwargs.get("created", False):
         if not instance.statuses.all().exists():
             ApplicationEventStatus.objects.create(
+                application_event=instance,
+                status=ApplicationEventStatus.CREATED,
+                user=None,
+            )
+
+@receiver(
+    post_save, sender=ApplicationEventSchedule, dispatch_uid="create_application_event_shedule_status"
+)
+def create_application_event_schedule_status(sender, instance, **kwargs):
+    if kwargs.get("raw", False):
+        return
+    if kwargs.get("created", False):
+        if not instance.statuses.all().exists():
+            ApplicationEventScheduleStatus.objects.create(
                 application_event=instance,
                 status=ApplicationEventStatus.CREATED,
                 user=None,

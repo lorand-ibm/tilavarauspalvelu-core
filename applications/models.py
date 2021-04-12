@@ -795,6 +795,44 @@ class EventOccurrence(object):
         self.occurrences = occurrences
 
 
+class ApplicationEventScheduleStatus(models.Model):
+    CREATED = "created"
+    APPROVED = "approved"
+    DECLINED = "declined"
+
+    STATUS_CHOICES = (
+        (CREATED, _("Created")),
+        (APPROVED, _("Approved")),
+        (DECLINED, _("Declined")),
+    )
+
+    status = models.CharField(
+        max_length=20, verbose_name=_("Status"), choices=STATUS_CHOICES
+    )
+
+    application_event_schedule = models.ForeignKey(
+        "ApplicationEventSchedule",
+        verbose_name=_("Application event schedule"),
+        on_delete=models.CASCADE,
+        null=False,
+        related_name="statuses",
+    )
+
+    user = models.ForeignKey(
+        User,
+        verbose_name=_("User"),
+        null=True,
+        blank=True,
+        on_delete=models.SET_NULL,
+    )
+
+    timestamp = models.DateTimeField(verbose_name=_("Timestamp"), auto_now_add=True)
+
+    @classmethod
+    def get_statuses(cls):
+        return [s[0] for s in cls.STATUS_CHOICES]
+
+
 class ApplicationEventSchedule(models.Model):
     day = models.IntegerField(verbose_name=_("Day"), choices=DAY_CHOICES, null=False)
 
@@ -821,6 +859,8 @@ class ApplicationEventSchedule(models.Model):
         on_delete=models.CASCADE,
         related_name="application_event_schedules",
     )
+
+    declined_reservation_units = models.ManyToManyField("reservation_units.ReservationUnit", verbose_name=_("Declined reservation units"), blank=True)
 
     def get_occurences(self) -> [EventOccurrence]:
         first_matching_day = next_or_current_matching_weekday(
@@ -861,6 +901,29 @@ class ApplicationEventSchedule(models.Model):
             end=self.end,
             occurrences=list(pattern.occurrences()),
         )
+
+    @property
+    def status(self):
+        return self.get_status().status
+
+    @status.setter
+    def status(self, status):
+        self.set_status(status)
+
+    @status.getter
+    def status(self):
+        return self.get_status().status
+
+    def set_status(self, status, user=None):
+        if status not in ApplicationEventScheduleStatus.get_statuses():
+            raise ValidationError(_("Invalid application event schedule status"))
+        if status != self.status:
+            ApplicationEventScheduleStatus.objects.create(
+                application_event_schedule=self, status=status, user=user
+            )
+
+    def get_status(self):
+        return self.statuses.last()
 
 
 class Recurrence(models.Model):

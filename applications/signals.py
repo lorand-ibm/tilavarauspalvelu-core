@@ -4,10 +4,12 @@ from django.dispatch import receiver
 from .models import (
     Application,
     ApplicationEvent,
+    ApplicationEventSchedule,
+    ApplicationEventScheduleStatus,
     ApplicationEventStatus,
     ApplicationRound,
     ApplicationRoundStatus,
-    ApplicationStatus, ApplicationEventSchedule, ApplicationEventScheduleStatus,
+    ApplicationStatus,
 )
 
 
@@ -49,8 +51,11 @@ def create_application_event_status(sender, instance, **kwargs):
                 user=None,
             )
 
+
 @receiver(
-    post_save, sender=ApplicationEventSchedule, dispatch_uid="create_application_event_shedule_status"
+    post_save,
+    sender=ApplicationEventSchedule,
+    dispatch_uid="create_application_event_shedule_status",
 )
 def create_application_event_schedule_status(sender, instance, **kwargs):
     if kwargs.get("raw", False):

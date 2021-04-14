@@ -860,7 +860,11 @@ class ApplicationEventSchedule(models.Model):
         related_name="application_event_schedules",
     )
 
-    declined_reservation_units = models.ManyToManyField("reservation_units.ReservationUnit", verbose_name=_("Declined reservation units"), blank=True)
+    declined_reservation_units = models.ManyToManyField(
+        "reservation_units.ReservationUnit",
+        verbose_name=_("Declined reservation units"),
+        blank=True,
+    )
 
     def get_occurences(self) -> [EventOccurrence]:
         first_matching_day = next_or_current_matching_weekday(

@@ -13,6 +13,7 @@ from applications.models import (
     Application,
     ApplicationEvent,
     ApplicationEventSchedule,
+    ApplicationEventScheduleStatus,
     ApplicationEventStatus,
     ApplicationRound,
     ApplicationStatus,
@@ -20,7 +21,7 @@ from applications.models import (
     EventReservationUnit,
     Organisation,
     Person,
-    Recurrence, ApplicationEventScheduleStatus,
+    Recurrence,
 )
 from reservation_units.models import Purpose, ReservationUnit
 from reservations.models import AbilityGroup, AgeGroup
@@ -148,7 +149,13 @@ class ApplicationEventScheduleSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ApplicationEventSchedule
-        fields = ["id", "day", "begin", "end", "status"]
+        fields = [
+            "id",
+            "day",
+            "begin",
+            "end",
+            "status",
+        ]
         extra_kwargs = {
             "day": {
                 "help_text": "Day of requested reservation allocation time slot for event represented as number. "
@@ -346,7 +353,7 @@ class ApplicationEventSerializer(serializers.ModelSerializer):
         event_ids = []
         for schedule in schedule_data:
             f = ApplicationEventSchedule(
-                **schedule, application_event=application_event
+                **schedule, application_event=application_event,
             )
             f.save()
             event_ids.append(f.id)

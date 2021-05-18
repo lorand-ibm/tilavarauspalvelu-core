@@ -3,6 +3,7 @@ from rest_framework import routers
 from .allocation_api import AllocationRequestViewSet
 from .allocation_results_api import AllocationResultViewSet
 from .application_round_api import ApplicationRoundViewSet
+from .application_round_csv_export_api import ApplicationRoundCsvViewSet
 from .applications_api.views import (
     ApplicationEventStatusViewSet,
     ApplicationEventViewSet,
@@ -51,7 +52,10 @@ router.register(
     ApplicationEventStatusViewSet,
     "application_event_status",
 )
-router.register(r"application_round", ApplicationRoundViewSet, "application_round")
+router.register(
+    r"application_round_csv", ApplicationRoundCsvViewSet, "application_round_csv"
+)
+router.register(r"application_round_csv", ApplicationRoundViewSet, "application_round")
 router.register(r"users", UserViewSet, "user")
 router.register(r"unit_role", UnitRoleViewSet, "unit_role")
 router.register(r"service_sector_role", ServiceSectorRoleViewSet, "service_sector_role")

@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from typing import List, Optional, Union
 
 import requests
+from cachetools import LRUCache, cached
 from django.conf import settings
 
 from opening_hours.enums import State
@@ -90,6 +91,7 @@ def make_hauki_request(url, params):
     return days_data_in
 
 
+@cached(cache=LRUCache(maxsize=128))
 def get_opening_hours(
     resource_id: Union[str, int, list],
     start_date: Union[str, datetime.date],

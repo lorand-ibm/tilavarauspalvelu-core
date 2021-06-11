@@ -1,3 +1,6 @@
+from django.urls import path
+from django.views.decorators.csrf import csrf_exempt
+from graphene_django.views import GraphQLView
 from rest_framework import routers
 
 from .allocation_api import AllocationRequestViewSet
@@ -112,3 +115,8 @@ router.register(
     "equipment",
 )
 router.register(r"parameters/city", CityViewSet, "city")
+
+
+urlpatterns = [
+    path("graphql", GraphQLView.as_view(graphiql=True)),
+]

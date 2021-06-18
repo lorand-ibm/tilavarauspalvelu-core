@@ -91,6 +91,7 @@ INSTALLED_APPS = [
     "social_django",
     "tinymce",
     "easy_thumbnails",
+    "django_celery_results",
 ]
 
 MIDDLEWARE = [
@@ -355,6 +356,29 @@ THUMBNAIL_ALIASES = {
         "medium": {"size": (384, 384), "crop": True},
     },
 }
+
+CELERY_RESULT_BACKEND = 'django-db'
+
+CELERY_CACHE_BACKEND = 'django-cache'
+
+CELERY_TIMEZONE = "Australia/Tasmania"
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
+CELERY_BROKER_URL = 'filesystem://'
+
+CELERY_BROKER_TRANSPORT_OPTIONS = {
+
+'data_folder_out': '/Users/aprenfors/Documents/git/tilavarauspalvelu-core/broker/queue/',
+
+'data_folder_in': '/Users/aprenfors/Documents/git/tilavarauspalvelu-core/broker/queue/',
+
+'processed_folder': '/Users/aprenfors/Documents/git/tilavarauspalvelu-core/broker/processed/',
+
+'store_processed': True
+
+}
+
+
 
 
 # local_settings.py can be used to override environment-specific settings

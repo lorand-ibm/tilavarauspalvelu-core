@@ -1,6 +1,6 @@
 import os
 
-from celery import Celery
+from celery import Celery, shared_task
 
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tilavarauspalvelu.settings')
@@ -26,5 +26,14 @@ app.autodiscover_tasks()
 
 
 @app.task(bind=True)
-def debug_task(self, id):
-    print(f'Request: {id}')
+def debug_task(self, event):
+    print(f'Request: {event.id}')
+
+@shared_task
+def debug_task2(event_id):
+    print(f'Starting: {event_id}')
+    from applications.models import ApplicationEvent
+    event = ApplicationEvent.objects.get(pk=event_id)
+    from applications.utils.aggregate_data import ApplicationEventScheduleResultAggregateDataCreator
+    ApplicationEventScheduleResultAggregateDataCreator(event).run()
+    print(f'Request: {event.id}')

@@ -1,0 +1,5 @@
+# Extra arguments to celeryd
+CELERYD_OPTS="--time-limit 300"
+
+# Name of the celery config module.#
+CELERY_CONFIG_MODULE="tilavarauspalvelu"

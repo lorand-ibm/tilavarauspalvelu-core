@@ -119,6 +119,7 @@ def get_opening_hours(
         "start_date": start_date,
         "end_date": end_date,
     }
+    print(resource_opening_hours_url)
     days_data_in = make_hauki_request(resource_opening_hours_url, query_params)
 
     days_data_out = []

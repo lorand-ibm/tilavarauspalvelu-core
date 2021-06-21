@@ -10,7 +10,7 @@ from applications.models import (
 from applications.utils.aggregate_data import (
     ApplicationEventScheduleResultAggregateDataCreator,
 )
-from tilavarauspalvelu.celery import debug_task
+from tilavarauspalvelu.celery import debug_task, debug_task2
 
 logger = logging.getLogger(__name__)
 
@@ -59,6 +59,7 @@ class AllocationResultMapper(object):
 
         for event in set(application_events):
             print(event.id)
-            foo = debug_task.apply_async([event.id])
+            creator = ApplicationEventScheduleResultAggregateDataCreator(event)
+            foo = debug_task2.delay(event_id = event.id)
             foo.ready()
-            ApplicationEventScheduleResultAggregateDataCreator(event).start()
+            #ApplicationEventScheduleResultAggregateDataCreator(event).run()

@@ -869,12 +869,16 @@ class ApplicationEvent(models.Model):
             logger.info("Event #{} aggregate data created.".format(self.id))
 
     def create_schedule_result_aggregated_data(self):
+        print("go gog go")
         total_amount_of_events = []
         total_events_duration = []
         for schedule in self.application_event_schedules.all():
             if not hasattr(schedule, "application_event_schedule_result"):
+                print("skip")
                 continue
-
+            else:
+                print("doing stuff")
+            print(schedule)
             schedule.application_event_schedule_result.create_aggregate_data()
 
             if schedule.application_event_schedule_result.declined:
@@ -1147,7 +1151,8 @@ class ApplicationEventScheduleResult(models.Model):
         total_events_duration = (
             total_amount_of_events * self.allocated_duration
         ).total_seconds()
-
+        print(total_amount_of_events)
+        print(total_events_duration)
         try:
             name = "duration_total"
             ApplicationEventScheduleResultAggregateData.objects.update_or_create(

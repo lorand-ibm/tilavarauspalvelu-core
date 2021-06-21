@@ -7,6 +7,7 @@ from django.db.models import DurationField, ExpressionWrapper, F
 
 from opening_hours.hours import HaukiConfigurationError
 from opening_hours.utils import get_resources_total_hours
+from tilavarauspalvelu.celery import app
 
 logger = logging.getLogger(__name__)
 
@@ -108,12 +109,15 @@ class EventAggregateDataCreator(BaseAggregateDataCreator):
         return self.event.create_aggregate_data()
 
 
+
 class ApplicationEventScheduleResultAggregateDataCreator(BaseAggregateDataCreator):
     def __init__(self, event, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.event = event
 
     def run(self) -> None:
+        print('lets go')
+        print(self)
         return self.event.create_schedule_result_aggregated_data()
 
 
@@ -134,6 +138,7 @@ class ApplicationRoundAggregateDataCreator(BaseAggregateDataCreator):
 
         try:
             for name, value in data.items():
+                print(value)
                 ApplicationRoundAggregateData.objects.update_or_create(
                     application_round=self.app_round,
                     name=name,

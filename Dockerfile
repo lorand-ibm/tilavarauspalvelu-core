@@ -51,18 +51,6 @@ RUN pip install --upgrade pip
 
 WORKDIR /tvp
 
-RUN useradd -N -M --system -s /bin/bash celery && echo celery:"B1llyB0n3s" | /usr/sbin/chpasswd
-# celery perms
-RUN groupadd grp_celery && usermod -a -G grp_celery celery && mkdir -p /var/run/celery/ /var/log/celery/
-RUN chown -R celery:grp_celery /var/run/celery/ /var/log/celery/
-# copy celery daemon files
-ADD init_celeryd /etc/init.d/celeryd
-RUN chmod +x /etc/init.d/celeryd
-
-# copy celery config
-ADD celery_config /etc/default/celeryd
-RUN chmod 640 /etc/default/celeryd
-
 
 ENV APP_NAME tilavarauspalvelu
 

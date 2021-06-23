@@ -25,9 +25,10 @@ services:
                 BUILD_MODE: ${BUILD_MODE}
                 LOCAL_REDHAT_USERNAME: ${REDHAT_USERNAME}
                 LOCAL_REDHAT_PASSWORD: ${REDHAT_PASSWORD}
+        network_mode: "host"
         environment:
             - DEBUG=true
-            - DATABASE_URL=postgis://tvp:tvp@db/tvp
+            - DATABASE_URL=postgis://tvp:tvp@127.0.0.1/tvp
             - WAIT_FOR_IT_ADDRESS=postgres:5432
         command: ["start_django_development_server"]
         ports:

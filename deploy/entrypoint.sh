@@ -15,7 +15,7 @@ _log_boxed "Tilavarauspalvelu container"
 
 if [ "$1" = "start_django_development_server" ]; then
     _log_boxed "Running development server"
-    exec deploy/start_dev_server.sh
+    exec celery -A tilavarauspalvelu worker --detach & deploy/start_dev_server.sh
 elif [ "$1" = "migrate" ]; then
     _log_boxed "Running migrations"
     ./manage.py migrate

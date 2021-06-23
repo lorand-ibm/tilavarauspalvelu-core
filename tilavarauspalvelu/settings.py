@@ -368,11 +368,11 @@ CELERY_BROKER_URL = 'filesystem://'
 
 CELERY_BROKER_TRANSPORT_OPTIONS = {
 
-'data_folder_out': '/Users/aprenfors/Documents/git/tilavarauspalvelu-core/broker/queue/',
+'data_folder_out': '/broker/queue/',
 
-'data_folder_in': '/Users/aprenfors/Documents/git/tilavarauspalvelu-core/broker/queue/',
+'data_folder_in': '/broker/queue/',
 
-'processed_folder': '/Users/aprenfors/Documents/git/tilavarauspalvelu-core/broker/processed/',
+'processed_folder': '/broker/processed/',
 
 'store_processed': True
 

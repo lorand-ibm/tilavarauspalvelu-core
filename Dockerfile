@@ -10,21 +10,6 @@ ARG LOCAL_REDHAT_USERNAME
 ARG LOCAL_REDHAT_PASSWORD
 ARG BUILD_MODE
 
-
-WORKDIR /tvp
-
-RUN useradd -N -M --system -s /bin/bash celery && echo celery:"B1llyB0n3s" | /usr/sbin/chpasswd
-# celery perms
-RUN groupadd grp_celery && usermod -a -G grp_celery celery && mkdir -p /var/run/celery/ /var/log/celery/
-RUN chown -R celery:grp_celery /var/run/celery/ /var/log/celery/
-# copy celery daemon files
-ADD init_celeryd /etc/init.d/celeryd
-RUN chmod +x /etc/init.d/celeryd
-
-# copy celery config
-ADD celery_config /etc/default/celeryd
-RUN chmod 640 /etc/default/celeryd
-
 RUN if [ "x$BUILD_MODE" = "xlocal" ] ;\
     then \
         subscription-manager register --username $LOCAL_REDHAT_USERNAME --password $LOCAL_REDHAT_PASSWORD --auto-attach; \
@@ -44,20 +29,22 @@ RUN useradd -ms /bin/bash -d /tvp tvp
 # Statics are kept inside container image for serving using whitenoise
 RUN mkdir -p /srv/static && chown tvp /srv/static && chown tvp /opt/app-root/bin
 
+RUN mkdir -p /broker/queue && chown tvp /broker/queue
+
+RUN mkdir -p /broker/processed && chown tvp /broker/queue
+
 RUN chown tvp /opt/app-root/lib/python3.8/site-packages
 RUN chown tvp /opt/app-root/lib/python3.8/site-packages/*
 RUN pip install --upgrade pip
 
+ENV APP_NAME tilavarauspalvelu
 
 WORKDIR /tvp
 
-
-ENV APP_NAME tilavarauspalvelu
-
-
-
 COPY deploy/* ./deploy/
 
+RUN subscription-manager unregister
+RUN subscription-manager clean
 RUN subscription-manager remove --all
 
 RUN npm install @sentry/cli

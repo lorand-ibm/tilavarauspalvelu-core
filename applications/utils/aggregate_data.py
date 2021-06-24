@@ -2,6 +2,7 @@ import logging
 import sys
 from threading import Thread
 
+from django.conf import settings
 from django.db import Error
 from django.db.models import DurationField, ExpressionWrapper, F
 
@@ -12,12 +13,16 @@ from tilavarauspalvelu.celery import app
 logger = logging.getLogger(__name__)
 
 
-class BaseAggregateDataCreator(Thread):
-    def start(self) -> None:
-        if len(sys.argv) > 1 and sys.argv[1] == "test":
-            self.run()
-            return
-        super().run()
+class BaseAggregateDataCreator(object):
+    def start(self, *args, **kwargs):
+        if settings.CELERY_ENABLED:
+            self.run.delay(*args, **kwargs)
+        else:
+            self.run(*args, **kwargs)
+
+    def run(self):
+        pass
+
 
 
 class ApplicationAggregateDataCreator(BaseAggregateDataCreator):
@@ -109,14 +114,13 @@ class EventAggregateDataCreator(BaseAggregateDataCreator):
         return self.event.create_aggregate_data()
 
 
-
 class ApplicationEventScheduleResultAggregateDataCreator(BaseAggregateDataCreator):
     def __init__(self, event, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.event = event
 
     def run(self) -> None:
-        print('lets go')
+        print("lets go")
         print(self)
         return self.event.create_schedule_result_aggregated_data()
 

@@ -58,7 +58,9 @@ django-extensions==3.0.9
 django-extra-fields==3.0.2
     # via -r requirements.in
 django-filter==2.4.0
-    # via -r requirements.in
+    # via
+    #   -r requirements.in
+    #   graphene-permissions
 django-helusers==0.6.0
     # via -r requirements.in
 django-js-asset==1.2.2
@@ -116,9 +118,15 @@ freezegun==0.3.14
 future==0.18.2
     # via pyjwkest
 graphene-django==2.13.0
+    # via
+    #   -r requirements.in
+    #   graphene-permissions
+graphene-permissions==1.1.4
     # via -r requirements.in
 graphene==2.1.8
-    # via graphene-django
+    # via
+    #   graphene-django
+    #   graphene-permissions
 graphql-core==2.3.2
     # via
     #   graphene

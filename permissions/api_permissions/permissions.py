@@ -10,7 +10,7 @@ from applications.models import (
 )
 from spaces.models import ServiceSector, Unit, UnitGroup
 
-from .helpers import (
+from ..helpers import (
     can_allocate_allocation_request,
     can_allocate_service_sector_allocations,
     can_manage_ability_groups,
@@ -39,9 +39,10 @@ from .helpers import (
     can_view_recurring_reservation,
     can_view_reservation,
 )
+from .base import ApiPermissionsBase
 
 
-class AllowNonePermission(permissions.BasePermission):
+class AllowNonePermission(ApiPermissionsBase):
     def has_object_permission(self, request, view, reservation_unit):
         return False
 
@@ -49,12 +50,12 @@ class AllowNonePermission(permissions.BasePermission):
         return False
 
 
-class ReadOnly(permissions.BasePermission):
+class ReadOnly(ApiPermissionsBase):
     def has_permission(self, request, view):
         return request.method in permissions.SAFE_METHODS
 
 
-class ReservationUnitCalendarUrlPermission(permissions.BasePermission):
+class ReservationUnitCalendarUrlPermission(ApiPermissionsBase):
     def has_object_permission(self, request, view, reservation_unit):
         return request.user.is_authenticated and can_modify_reservation_unit(
             request.user, reservation_unit
@@ -64,7 +65,7 @@ class ReservationUnitCalendarUrlPermission(permissions.BasePermission):
         return True
 
 
-class ReservationUnitPermission(permissions.BasePermission):
+class ReservationUnitPermission(ApiPermissionsBase):
     def has_object_permission(self, request, view, reservation_unit):
         if view.action == "capacity":
             if request.user.is_authenticated:
@@ -96,7 +97,7 @@ class ReservationUnitPermission(permissions.BasePermission):
         return True
 
 
-class ResourcePermission(permissions.BasePermission):
+class ResourcePermission(ApiPermissionsBase):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -104,7 +105,7 @@ class ResourcePermission(permissions.BasePermission):
         return can_manage_resources(request.user)
 
 
-class ReservationPermission(permissions.BasePermission):
+class ReservationPermission(ApiPermissionsBase):
     def has_object_permission(self, request, view, reservation):
         if request.method in permissions.SAFE_METHODS:
             return can_view_reservation(request.user, reservation)
@@ -114,7 +115,7 @@ class ReservationPermission(permissions.BasePermission):
         return request.user.is_authenticated
 
 
-class RecurringReservationPermission(permissions.BasePermission):
+class RecurringReservationPermission(ApiPermissionsBase):
     def has_object_permission(self, request, view, recurring_reservation):
         if request.method in permissions.SAFE_METHODS:
             return can_view_recurring_reservation(request.user, recurring_reservation)
@@ -124,12 +125,12 @@ class RecurringReservationPermission(permissions.BasePermission):
         return request.user.is_authenticated
 
 
-class GeneralRolePermission(permissions.BasePermission):
+class GeneralRolePermission(ApiPermissionsBase):
     def has_permission(self, request, view):
         return can_manage_general_roles(request.user)
 
 
-class UnitRolePermission(permissions.BasePermission):
+class UnitRolePermission(ApiPermissionsBase):
     def has_object_permission(self, request, view, unit_role):
         if unit_role.unit_group:
             return can_manage_unit_group_roles(request.user, unit_role.unit_group)
@@ -150,7 +151,7 @@ class UnitRolePermission(permissions.BasePermission):
         return request.method in permissions.SAFE_METHODS
 
 
-class ServiceSectorRolePermission(permissions.BasePermission):
+class ServiceSectorRolePermission(ApiPermissionsBase):
     def has_object_permission(self, request, view, service_sector_role):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -170,7 +171,7 @@ class ServiceSectorRolePermission(permissions.BasePermission):
             return False
 
 
-class ApplicationRoundPermission(permissions.BasePermission):
+class ApplicationRoundPermission(ApiPermissionsBase):
     def has_object_permission(self, request, view, application_round):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -193,7 +194,7 @@ class ApplicationRoundPermission(permissions.BasePermission):
             return False
 
 
-class ApplicationStatusPermission(permissions.BasePermission):
+class ApplicationStatusPermission(ApiPermissionsBase):
     def has_object_permission(self, request, view, application_event_status):
         return False
 
@@ -230,7 +231,7 @@ class ApplicationStatusPermission(permissions.BasePermission):
             return False
 
 
-class ApplicationEventStatusPermission(permissions.BasePermission):
+class ApplicationEventStatusPermission(ApiPermissionsBase):
     def has_object_permission(self, request, view, application_event_status):
         return False
 
@@ -292,7 +293,7 @@ class ApplicationEventStatusPermission(permissions.BasePermission):
             return False
 
 
-class CityPermission(permissions.BasePermission):
+class CityPermission(ApiPermissionsBase):
     def has_object_permission(self, request, view, city):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -306,7 +307,7 @@ class CityPermission(permissions.BasePermission):
         return can_modify_city(request.user)
 
 
-class ApplicationPermission(permissions.BasePermission):
+class ApplicationPermission(ApiPermissionsBase):
     def has_object_permission(self, request, view, application):
         if request.method in permissions.SAFE_METHODS:
             return can_read_application(request.user, application)
@@ -316,7 +317,7 @@ class ApplicationPermission(permissions.BasePermission):
         return request.user.is_authenticated
 
 
-class AllocationRequestPermission(permissions.BasePermission):
+class AllocationRequestPermission(ApiPermissionsBase):
     def has_object_permission(self, request, view, allocation_request):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -336,7 +337,7 @@ class AllocationRequestPermission(permissions.BasePermission):
             return False
 
 
-class AllocationResultsPermission(permissions.BasePermission):
+class AllocationResultsPermission(ApiPermissionsBase):
     def has_object_permission(self, request, view, obj: ApplicationEventScheduleResult):
         service_sector = (
             obj.application_event_schedule.application_event.application.application_round.service_sector
@@ -365,7 +366,7 @@ class AllocationResultsPermission(permissions.BasePermission):
         return False
 
 
-class ApplicationEventPermission(permissions.BasePermission):
+class ApplicationEventPermission(ApiPermissionsBase):
     def has_object_permission(self, request, view, application_event):
         return can_modify_application(request.user, application_event.application)
 
@@ -380,7 +381,7 @@ class ApplicationEventPermission(permissions.BasePermission):
         return request.user.is_authenticated
 
 
-class ApplicationEventWeeklyAmountReductionPermission(permissions.BasePermission):
+class ApplicationEventWeeklyAmountReductionPermission(ApiPermissionsBase):
     def has_object_permission(
         self, request, view, weekly_reduction: ApplicationEventWeeklyAmountReduction
     ):
@@ -425,7 +426,7 @@ class ApplicationEventWeeklyAmountReductionPermission(permissions.BasePermission
         return True
 
 
-class AgeGroupPermission(permissions.BasePermission):
+class AgeGroupPermission(ApiPermissionsBase):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -433,7 +434,7 @@ class AgeGroupPermission(permissions.BasePermission):
         return can_manage_age_groups(request.user)
 
 
-class PurposePermission(permissions.BasePermission):
+class PurposePermission(ApiPermissionsBase):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -441,7 +442,7 @@ class PurposePermission(permissions.BasePermission):
         return can_manage_purposes(request.user)
 
 
-class AbilityGroupPermission(permissions.BasePermission):
+class AbilityGroupPermission(ApiPermissionsBase):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -449,7 +450,7 @@ class AbilityGroupPermission(permissions.BasePermission):
         return can_manage_ability_groups(request.user)
 
 
-class ReservationUnitTypePermission(permissions.BasePermission):
+class ReservationUnitTypePermission(ApiPermissionsBase):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -457,7 +458,7 @@ class ReservationUnitTypePermission(permissions.BasePermission):
         return can_manage_reservation_unit_types(request.user)
 
 
-class EquipmentCategoryPermission(permissions.BasePermission):
+class EquipmentCategoryPermission(ApiPermissionsBase):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -465,7 +466,7 @@ class EquipmentCategoryPermission(permissions.BasePermission):
         return can_manage_equipment_categories(request.user)
 
 
-class EquipmentPermission(permissions.BasePermission):
+class EquipmentPermission(ApiPermissionsBase):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -473,7 +474,7 @@ class EquipmentPermission(permissions.BasePermission):
         return can_manage_equipment(request.user)
 
 
-class DistrictPermission(permissions.BasePermission):
+class DistrictPermission(ApiPermissionsBase):
     def has_permission(self, request, view):
         if request.method in permissions.SAFE_METHODS:
             return True
@@ -481,7 +482,7 @@ class DistrictPermission(permissions.BasePermission):
         return can_manage_districts(request.user)
 
 
-class UserPermission(permissions.BasePermission):
+class UserPermission(ApiPermissionsBase):
     def has_permission(self, request, view):
         return (
             request.user.is_authenticated and request.method in permissions.SAFE_METHODS

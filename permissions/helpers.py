@@ -111,8 +111,12 @@ def can_modify_reservation_unit(user: User, reservation_unit: ReservationUnit) -
 
 def can_handle_application(user: User, application: Application) -> bool:
     permission = "can_handle_applications"
-    return is_superuser(user) or has_service_sector_permission(
-        user, [application.application_period.service_sector], permission
+    return (
+        is_superuser(user)
+        or has_service_sector_permission(
+            user, [application.application_round.service_sector], permission
+        )
+        or has_general_permission(user, permission)
     )
 
 
@@ -189,6 +193,16 @@ def can_modify_application(user: User, application: Application) -> bool:
             and datetime.now(tz=timezone.get_default_timezone())
             < application.application_round.application_period_end
         )
+        or can_manage_service_sectors_applications(
+            user, application.application_round.service_sector
+        )
+    )
+
+
+def can_read_application(user: User, application: Application) -> bool:
+    return (
+        is_superuser(user)
+        or (application.user == user)
         or can_manage_service_sectors_applications(
             user, application.application_round.service_sector
         )

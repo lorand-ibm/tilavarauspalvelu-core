@@ -1,6 +1,7 @@
 import pytest
 from django.urls import reverse
 
+from api.graphql.schema import schema
 from reservation_units.models import Equipment, EquipmentCategory, ReservationUnit
 
 

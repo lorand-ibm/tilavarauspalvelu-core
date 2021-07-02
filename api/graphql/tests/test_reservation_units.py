@@ -2,6 +2,7 @@ import json
 
 import snapshottest
 from assertpy import assert_that
+from graphene.test import Client
 from graphene_django.utils import GraphQLTestCase
 from rest_framework.test import APIClient
 
@@ -71,3 +72,27 @@ class ReservationUnitTestCase(GraphQLTestCase, snapshottest.TestCase):
         assert_that(response.status_code).is_equal_to(200)
         content = json.loads(response.content)
         self.assertMatchSnapshot(content)
+
+
+    def test_graphql(
+            self
+    ):
+        query = """
+            query {
+                reservationUnits {
+                edges {
+                node {
+                    name
+                    spaces {
+                      id
+                      name
+                    }
+                  }
+                }
+              }
+            }
+
+        """
+        client = Client(schema)
+        response = client.execute(query)
+        assert len(response["data"]) > 0

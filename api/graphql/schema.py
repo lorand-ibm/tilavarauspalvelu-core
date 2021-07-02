@@ -7,6 +7,8 @@ from graphene_permissions.permissions import AllowAuthenticated
 
 from api.graphql.reservation_units.reservation_unit_types import ReservationUnitType
 from api.graphql.reservations.reservation_types import ReservationType
+from api.graphql.resources.resource_types import ResourceType
+from permissions.api_permissions import ReservationUnitPermission, ResourcePermission
 from reservations.forms import ReservationForm
 
 
@@ -20,10 +22,17 @@ class ReservationMutation(DjangoModelFormMutation):
 class AllowAuthenticatedFilter(AuthFilter):
     permission_classes = (AllowAuthenticated,)
 
+class ReservationUnitFilter(AuthFilter, DjangoFilterConnectionField):
+    permission_classes = (ReservationUnitPermission.for_graphql(),)
+
+class ResourceFilter(AuthFilter, DjangoFilterConnectionField):
+    permission_classes = (ResourcePermission.for_graphql(),)
+
 
 class Query(graphene.ObjectType):
-    reservation_units = DjangoFilterConnectionField(ReservationUnitType)
+    reservation_units = ReservationUnitFilter(ReservationUnitType)
     reservation_unit = relay.Node.Field(ReservationUnitType)
+    # resources = ResourceFilter(ResourceType)
 
 
 class Mutation(graphene.ObjectType):

@@ -18,7 +18,7 @@ from rest_framework.reverse import reverse
 from rest_framework.viewsets import ViewSet
 
 from applications.models import ApplicationEvent
-from permissions.api_permissions import ReservationUnitCalendarUrlPermission
+from permissions.api_permissions.permissions import ReservationUnitCalendarUrlPermission
 from reservation_units.models import ReservationUnit
 from reservations.models import Reservation
 

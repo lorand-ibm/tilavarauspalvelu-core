@@ -43,6 +43,7 @@ from spaces.models import District, Location, ServiceSector, Space, Unit, UnitGr
 
 @pytest.fixture(autouse=True)
 def enable_permissions(settings):
+    print("why the fuck")
     settings.TMP_PERMISSIONS_DISABLED = False
 
 

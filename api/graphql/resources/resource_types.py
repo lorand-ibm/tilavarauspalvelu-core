@@ -5,25 +5,35 @@ from api.graphql.spaces.space_types import BuildingType
 from resources.models import Resource
 
 
+class ChoicesPropertyEnum(graphene.Enum):
+    LOCATION_FIXED = "fixed"
+    LOCATION_MOVABLE = "movable"
+
+
 class ResourceType(PrimaryKeyObjectType):
     building = graphene.List(BuildingType)
+
+    location_type = ChoicesPropertyEnum()
 
     class Meta:
         model = Resource
         fields = (
             "id",
-            "location_type",
             "name",
             "space",
             "buffer_time_before",
             "buffer_time_after",
         )
+        exclude_fields = ["location_type"]
 
         filter_fields = {
             "name": ["exact", "icontains", "istartswith"],
         }
 
         interfaces = (graphene.relay.Node,)
+
+    def resolve_location_type(self, info):
+        return self.location_type
 
     def resolve_buffer_time_before(self, info):
         if self.buffer_time_before is None:

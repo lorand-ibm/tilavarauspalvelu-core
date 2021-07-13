@@ -12,6 +12,10 @@ from api.graphql.reservation_units.reservation_unit_mutations import (
 )
 from api.graphql.reservation_units.reservation_unit_types import ReservationUnitType
 from api.graphql.reservations.reservation_types import ReservationType
+from api.graphql.resources.resource_mutations import (
+    ResourceCreateMutation,
+    ResourceUpdateMutation,
+)
 from api.graphql.resources.resource_types import ResourceType
 from reservation_units.models import ReservationUnit
 from reservations.forms import ReservationForm
@@ -50,6 +54,8 @@ class Mutation(graphene.ObjectType):
     create_reservation = ReservationMutation.Field()
     create_purpose = PurposeCreateMutation.Field()
     update_purpose = PurposeUpdateMutation.Field()
+    create_resource = ResourceCreateMutation.Field()
+    update_resource = ResourceUpdateMutation.Field()
 
 
 schema = graphene.Schema(query=Query, mutation=Mutation)

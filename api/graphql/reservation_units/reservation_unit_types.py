@@ -1,7 +1,6 @@
 import graphene
 from easy_thumbnails.files import get_thumbnailer
 from graphene_django import DjangoObjectType
-from graphene_permissions.mixins import AuthNode
 
 from api.graphql.base_type import PrimaryKeyObjectType
 from api.graphql.resources.resource_types import ResourceType
@@ -85,7 +84,7 @@ class EquipmentType(PrimaryKeyObjectType):
         return self.category
 
 
-class ReservationUnitType(AuthNode, PrimaryKeyObjectType):
+class ReservationUnitType(PrimaryKeyObjectType):
     pk = graphene.Int()
     spaces = graphene.List(SpaceType)
     resources = graphene.List(ResourceType)

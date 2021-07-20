@@ -1,5 +1,6 @@
 import graphene
 from graphene_django.rest_framework.mutation import SerializerMutation
+from graphene_django_extras import DjangoSerializerMutation
 from rest_framework.generics import get_object_or_404
 
 from api.graphql.resources.resource_serializers import (
@@ -10,7 +11,7 @@ from api.graphql.resources.resource_types import ResourceType
 from resources.models import Resource
 
 
-class ResourceCreateMutation(SerializerMutation):
+class ResourceCreateMutation(DjangoSerializerMutation):
     resource = graphene.Field(ResourceType)
 
     class Meta:
@@ -24,7 +25,7 @@ class ResourceCreateMutation(SerializerMutation):
         return cls(errors=None, purpose=purpose)
 
 
-class ResourceUpdateMutation(SerializerMutation):
+class ResourceUpdateMutation(DjangoSerializerMutation):
     resource = graphene.Field(ResourceType)
 
     class Meta:

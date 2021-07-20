@@ -10,7 +10,7 @@ class ResourceCreateSerializer(ResourceSerializer, PrimaryKeySerializer):
         fields = [
             field
             for field in ResourceSerializer.Meta.fields
-            if field != "location_type"
+            if field not in ["location_type", "space_id"]
         ] + ["pk"]
 
 

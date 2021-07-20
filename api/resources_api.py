@@ -43,8 +43,4 @@ class ResourceSerializer(TranslatedModelSerializer):
 class ResourceViewSet(viewsets.ModelViewSet):
     serializer_class = ResourceSerializer
     queryset = Resource.objects.all()
-    permission_classes = (
-        [ResourcePermission]
-        if not settings.TMP_PERMISSIONS_DISABLED
-        else [permissions.AllowAny]
-    )
+    #e

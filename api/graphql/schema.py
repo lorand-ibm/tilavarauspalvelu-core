@@ -2,8 +2,6 @@ import graphene
 from graphene import Field, relay
 from graphene_django.filter import DjangoFilterConnectionField
 from graphene_django.forms.mutation import DjangoModelFormMutation
-from graphene_permissions.mixins import AuthFilter
-from graphene_permissions.permissions import AllowAuthenticated
 from rest_framework.generics import get_object_or_404
 
 from api.graphql.reservation_units.reservation_unit_mutations import (
@@ -28,9 +26,6 @@ class ReservationMutation(DjangoModelFormMutation):
     class Meta:
         form_class = ReservationForm
 
-
-class AllowAuthenticatedFilter(AuthFilter):
-    permission_classes = (AllowAuthenticated,)
 
 
 class Query(graphene.ObjectType):

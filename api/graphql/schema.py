@@ -84,13 +84,23 @@ class UnitsFilter(AuthFilter):
         (UnitPermission,) if not settings.TMP_PERMISSIONS_DISABLED else (AllowAny,)
     )
 
+def foobar(root, info, pk):
+    graphene_type =  info.return_type.graphene_type
+    if all((perm.has_node_permission_by_pk(info, id) for perm in graphene_type.permission_classes)):
+        try:
+            object_instance = graphene_type._meta.model.objects.get(pk=pk)  # type: ignore
+        except graphene_type._meta.model.DoesNotExist:  # type: ignore
+            object_instance = None
+        return object_instance
+    else:
+        return None
 
 class Query(graphene.ObjectType):
     reservation_units = ReservationUnitsFilter(
         ReservationUnitType, filterset_class=ReservationUnitsFilterSet
     )
     reservation_unit = relay.Node.Field(ReservationUnitType)
-    reservation_unit_by_pk = Field(ReservationUnitByPkType, pk=graphene.Int())
+    reservation_unit_by_pk = Field(ReservationUnitByPkType, pk=graphene.Int(), resolver=foobar)
 
     resources = ResourcesFilter(ResourceType)
     resource = relay.Node.Field(ResourceType)
@@ -104,9 +114,6 @@ class Query(graphene.ObjectType):
     unit = relay.Node.Field(UnitType)
     unit_by_pk = Field(UnitByPkType, pk=graphene.Int())
 
-    def resolve_reservation_unit_by_pk(self, info, **kwargs):
-        pk = kwargs.get("pk")
-        return get_object_or_404(ReservationUnit, pk=pk)
 
     def resolve_resource_by_pk(self, info, **kwargs):
         pk = kwargs.get("pk")

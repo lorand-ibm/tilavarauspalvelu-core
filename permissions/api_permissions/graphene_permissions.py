@@ -15,14 +15,19 @@ from permissions.helpers import (
 from reservations.models import Reservation
 from spaces.models import Unit
 
+class PrimaryKeyResolvableBasePermission(BasePermission):
+    @classmethod
+    def has_node_permission_by_pk(cls, info: ResolveInfo, pk: str) -> bool:
+        return cls.has_permission(info)
 
-class ReservationUnitHaukiUrlPermission(BasePermission):
+
+class ReservationUnitHaukiUrlPermission(PrimaryKeyResolvableBasePermission):
     @classmethod
     def has_permission(cls, info: ResolveInfo) -> bool:
         return False
 
     @classmethod
-    def has_node_permission(cls, info: ResolveInfo, id: str) -> bool:
+    def has_node_permission_by_pk(cls, info: ResolveInfo, id: str) -> bool:
         # FIXME: needs a fix for permissions, not called currently TILA-777
         return True
 
@@ -31,10 +36,14 @@ class ReservationUnitHaukiUrlPermission(BasePermission):
         return False
 
 
-class ReservationUnitPermission(BasePermission):
+class ReservationUnitPermission(PrimaryKeyResolvableBasePermission):
     @classmethod
     def has_permission(cls, info: ResolveInfo) -> bool:
         return True
+
+    @classmethod
+    def has_primary_key_permission(cls, info: ResolveInfo, pk: int) -> bool:
+        return cls.has_permission(info)
 
     @classmethod
     def has_mutation_permission(cls, root: Any, info: ResolveInfo, input: dict) -> bool:
@@ -42,7 +51,7 @@ class ReservationUnitPermission(BasePermission):
         return can_manage_units_reservation_units(info.context.user, unit)
 
 
-class ResourcePermission(BasePermission):
+class ResourcePermission(PrimaryKeyResolvableBasePermission):
     @classmethod
     def has_permission(cls, info: ResolveInfo) -> bool:
         return True
@@ -56,7 +65,7 @@ class ResourcePermission(BasePermission):
         return can_manage_resources(info.context.user)
 
 
-class ReservationPermission(BasePermission):
+class ReservationPermission(PrimaryKeyResolvableBasePermission):
     @classmethod
     def has_mutation_permission(cls, root: Any, info: ResolveInfo, input: dict) -> bool:
         reservation = Reservation(**input)
@@ -67,7 +76,7 @@ class ReservationPermission(BasePermission):
         return can_view_reservations(info.context.user)
 
 
-class PurposePermission(BasePermission):
+class PurposePermission(PrimaryKeyResolvableBasePermission):
     @classmethod
     def has_filter_permission(cls, info: ResolveInfo) -> bool:
         return True
@@ -77,7 +86,7 @@ class PurposePermission(BasePermission):
         return can_manage_purposes(info.context.user)
 
 
-class SpacePermission(BasePermission):
+class SpacePermission(PrimaryKeyResolvableBasePermission):
     @classmethod
     def has_permission(cls, info: ResolveInfo) -> bool:
         return True
@@ -91,8 +100,7 @@ class SpacePermission(BasePermission):
         return can_manage_spaces(info.context.user)
 
 
-class UnitPermission(BasePermission):
-    @classmethod
+class UnitPermission(PrimaryKeyResolvableBasePermission):
     def has_permission(cls, info: ResolveInfo) -> bool:
         return True
 

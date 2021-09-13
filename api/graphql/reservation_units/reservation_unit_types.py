@@ -1,4 +1,5 @@
 import datetime
+import functools
 
 import graphene
 from django.conf import settings
@@ -224,6 +225,26 @@ class ReservationUnitType(AuthNode, PrimaryKeyObjectType):
         return duration.time()
 
 
+def foobar2(root, info, pk):
+    graphene_type =  info.return_type.graphene_type
+    if all((perm.has_node_permission_by_pk(info, id) for perm in graphene_type.permission_classes)):
+        try:
+            object_instance = graphene_type._meta.model.objects.get(pk=pk)  # type: ignore
+        except graphene_type._meta.model.DoesNotExist:  # type: ignore
+            object_instance = None
+        return object_instance
+    else:
+        return None
+
+def do_twice(func):
+    @functools.wraps(func)
+    def wrapper_do_twice(cls, info, *args, **kwargs):
+        graphene_type = info.return_type.graphene_type
+        if all((perm.has_node_permission_by_pk(info, *args, **kwargs, id=1) for perm in graphene_type.permission_classes)):
+            return func(cls, info)
+        return None
+    return wrapper_do_twice
+
 class ReservationUnitByPkType(ReservationUnitType, OpeningHoursMixin):
     next_available_slot = graphene.DateTime()
 
@@ -260,5 +281,6 @@ class ReservationUnitByPkType(ReservationUnitType, OpeningHoursMixin):
         scheduler = ReservationUnitReservationScheduler(self)
         return scheduler.get_next_available_reservation_time()
 
+    @do_twice
     def resolve_hauki_url(self, info):
-        return self
+        return self.unit

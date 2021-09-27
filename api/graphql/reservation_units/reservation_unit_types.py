@@ -17,12 +17,17 @@ from api.graphql.spaces.space_types import LocationType, SpaceType
 from api.graphql.units.unit_types import UnitType
 from opening_hours.hauki_link_generator import generate_hauki_link
 from permissions.api_permissions.graphene_permissions import (
+    EquipmentCategoryPermission,
+    EquipmentPermission,
     ReservationUnitHaukiUrlPermission,
     ReservationUnitPermission,
 )
 from reservation_units.models import (
     Equipment,
     EquipmentCategory,
+    Keyword,
+    KeywordCategory,
+    KeywordGroup,
     Purpose,
     ReservationUnit,
     ReservationUnitImage,
@@ -33,6 +38,43 @@ from reservation_units.utils.reservation_unit_reservation_scheduler import (
 )
 from resources.models import Resource
 from spaces.models import Space
+
+
+class KeywordType(AuthNode, PrimaryKeyObjectType):
+    class Meta:
+        model = Keyword
+        fields = ("id", "name", "pk")
+        filter_fields = ["name"]
+        interfaces = (graphene.relay.Node,)
+
+
+class KeywordGroupType(AuthNode, PrimaryKeyObjectType):
+
+    keywords = graphene.List(KeywordType)
+
+    class Meta:
+        model = KeywordGroup
+        fields = ("id", "name", "pk")
+        filter_fields = ["name"]
+        interfaces = (graphene.relay.Node,)
+
+    def resolve_keywords(self, info):
+        return self.keywords.all()
+
+
+class KeywordCategoryType(AuthNode, PrimaryKeyObjectType):
+    keyword_groups = graphene.List(KeywordGroupType)
+
+    class Meta:
+        model = KeywordCategory
+        fields = ("id", "name", "pk")
+
+        filter_fields = ["name"]
+
+        interfaces = (graphene.relay.Node,)
+
+    def resolve_keyword_groups(self, info):
+        return self.keyword_groups.all()
 
 
 class PurposeType(AuthNode, PrimaryKeyObjectType):
@@ -98,20 +140,41 @@ class ReservationUnitTypeType(PrimaryKeyObjectType):
         interfaces = (graphene.relay.Node,)
 
 
-class EquipmentCategoryType(PrimaryKeyObjectType):
+class EquipmentCategoryType(AuthNode, PrimaryKeyObjectType):
+    permission_classes = (
+        (EquipmentCategoryPermission,)
+        if not settings.TMP_PERMISSIONS_DISABLED
+        else (AllowAny,)
+    )
+
     class Meta:
         model = EquipmentCategory
         fields = ("name", "id")
 
+        filter_fields = {
+            "name": ["exact", "icontains", "istartswith"],
+        }
+
         interfaces = (graphene.relay.Node,)
 
 
-class EquipmentType(PrimaryKeyObjectType):
+class EquipmentType(AuthNode, PrimaryKeyObjectType):
+    permission_classes = (
+        (EquipmentPermission,) if not settings.TMP_PERMISSIONS_DISABLED else (AllowAny,)
+    )
     category = graphene.Field(EquipmentCategoryType)
+
+    permission_classes = (
+        (EquipmentPermission,) if not settings.TMP_PERMISSIONS_DISABLED else (AllowAny,)
+    )
 
     class Meta:
         model = Equipment
         fields = ("name", "id")
+
+        filter_fields = {
+            "name": ["exact", "icontains", "istartswith"],
+        }
 
         interfaces = (graphene.relay.Node,)
 
@@ -135,6 +198,7 @@ class ReservationUnitType(AuthNode, PrimaryKeyObjectType):
     surface_area = graphene.Int()
     max_reservation_duration = graphene.Time()
     min_reservation_duration = graphene.Time()
+    keyword_groups = graphene.List(KeywordGroupType)
 
     permission_classes = (
         (ReservationUnitPermission,)
@@ -163,6 +227,9 @@ class ReservationUnitType(AuthNode, PrimaryKeyObjectType):
             "contact_information",
             "max_reservation_duration",
             "min_reservation_duration",
+            "is_draft",
+            "surface_area",
+            "buffer_time_between_reservations",
         )
         filter_fields = {
             "name": ["exact", "icontains", "istartswith"],
@@ -206,7 +273,10 @@ class ReservationUnitType(AuthNode, PrimaryKeyObjectType):
         return self.unit
 
     def resolve_max_persons(self, info):
-        return self.get_max_persons()
+        if not self.max_persons:
+            # Gets the max persons from spaces.
+            return self.get_max_persons()
+        return self.max_persons
 
     def resolve_surface_area(self, info):
         surface_area = self.spaces.aggregate(total_surface_area=Sum("surface_area"))
@@ -223,6 +293,9 @@ class ReservationUnitType(AuthNode, PrimaryKeyObjectType):
             return None
         duration = datetime.datetime(1, 1, 1) + self.min_reservation_duration
         return duration.time()
+
+    def resolve_keyword_groups(self, info):
+        return KeywordGroup.objects.filter(reservation_units=self.id)
 
 
 def foobar2(root, info, pk):
@@ -279,7 +352,8 @@ class ReservationUnitByPkType(ReservationUnitType, OpeningHoursMixin):
 
     def resolve_next_available_slot(self, info):
         scheduler = ReservationUnitReservationScheduler(self)
-        return scheduler.get_next_available_reservation_time()
+        start, end = scheduler.get_next_available_reservation_time()
+        return start
 
     @do_twice
     def resolve_hauki_url(self, info):

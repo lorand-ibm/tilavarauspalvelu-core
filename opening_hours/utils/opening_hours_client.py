@@ -27,18 +27,18 @@ class OpeningHoursClient:
         self.start = start
         self.end = end
 
-        if not hauki_origin_id:
-            hauki_origin_id = settings.HAUKI_ORIGIN_ID
+        if hauki_origin_id:
+            self.hauki_origin_id = hauki_origin_id
+        else:
+            self.hauki_origin_id = settings.HAUKI_ORIGIN_ID
 
         self.resources = {}
 
-        self.resources = {
-            f"{hauki_origin_id}:{resource_id}": resource_id for resource_id in resources
-        }
+        self.resources = resources
         self.opening_hours = {}
         if init_opening_hours:
             self._init_opening_hours_structure()
-            self._fetch_opening_hours(resources, start, end)
+            self._fetch_opening_hours(start, end)
 
         self.periods = {}
         for resource in resources:
@@ -60,24 +60,21 @@ class OpeningHoursClient:
             ...
         }
         """
-        self.opening_hours = {res_id: {} for k, res_id in self.resources.items()}
+        self.opening_hours = {res_id: {} for res_id in self.resources}
         running_date = self.start
         while running_date <= self.end:
-            for k, res_id in self.resources.items():
+            for res_id in self.resources:
                 self.opening_hours[res_id].update({running_date: []})
             running_date += datetime.timedelta(days=1)
 
-    def _fetch_opening_hours(
-        self, resources: [str], start: datetime.date, end: datetime.date
-    ):
-        for hour in get_opening_hours(resources, start, end):
-            res_id = self.resources[hour["resource_id"]]
+    def _fetch_opening_hours(self, start: datetime.date, end: datetime.date):
+        for hour in get_opening_hours(self.resources, start, end, self.hauki_origin_id):
+            res_id = hour["origin_id"]
             self.opening_hours[res_id][hour["date"]].extend(hour["times"])
 
     def refresh_opening_hours(self):
         self._init_opening_hours_structure()
-        resources = [res_id for k, res_id in self.resources.items()]
-        self._fetch_opening_hours(resources, self.start, self.end)
+        self._fetch_opening_hours(self.start, self.end)
 
     def get_opening_hours_for_resource(self, resource, date) -> [TimeElement]:
         resource = self.opening_hours.get(resource, {})

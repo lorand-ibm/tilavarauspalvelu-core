@@ -43,6 +43,45 @@ class ReservationUnitType(models.Model):
         return self.name
 
 
+class KeywordCategory(models.Model):
+    name = models.CharField(verbose_name=_("Name"), max_length=255)
+
+    def __str__(self):
+        return "{}".format(self.name)
+
+
+class KeywordGroup(models.Model):
+    name = models.CharField(verbose_name=_("Name"), max_length=255)
+
+    keyword_category = models.ForeignKey(
+        KeywordCategory,
+        verbose_name=_("Keyword category"),
+        related_name="keyword_groups",
+        blank=False,
+        null=False,
+        on_delete=models.PROTECT,
+    )
+
+    def __str__(self):
+        return "{}".format(self.name)
+
+
+class Keyword(models.Model):
+    name = models.CharField(verbose_name=_("Name"), max_length=255)
+
+    keyword_group = models.ForeignKey(
+        KeywordGroup,
+        verbose_name=_("Keyword group"),
+        related_name="keywords",
+        blank=False,
+        null=False,
+        on_delete=models.PROTECT,
+    )
+
+    def __str__(self):
+        return "{}".format(self.name)
+
+
 class ReservationUnit(models.Model):
     name = models.CharField(verbose_name=_("Name"), max_length=255)
     description = models.TextField(
@@ -51,6 +90,14 @@ class ReservationUnit(models.Model):
     spaces = models.ManyToManyField(
         Space, verbose_name=_("Spaces"), related_name="reservation_units", blank=True
     )
+
+    keyword_groups = models.ManyToManyField(
+        KeywordGroup,
+        verbose_name=_("Keyword groups"),
+        related_name="reservation_units",
+        blank=True,
+    )
+
     resources = models.ManyToManyField(
         Resource,
         verbose_name=_("Resources"),
@@ -108,6 +155,29 @@ class ReservationUnit(models.Model):
     )
 
     uuid = models.UUIDField(default=uuid.uuid4, null=False, editable=False, unique=True)
+
+    is_draft = models.BooleanField(
+        default=False,
+        verbose_name=_("Is this in draft state"),
+        blank=True,
+        db_index=True,
+    )
+
+    max_persons = models.fields.PositiveIntegerField(
+        verbose_name=_("Maximum number of persons"), null=True, blank=True
+    )
+
+    surface_area = models.DecimalField(
+        verbose_name=_("Surface area"),
+        max_digits=10,
+        decimal_places=2,
+        blank=True,
+        null=True,
+    )
+
+    buffer_time_between_reservations = models.DurationField(
+        verbose_name=_("Buffer time between reservations"), blank=True, null=True
+    )
 
     def __str__(self):
         return "{}".format(self.name)

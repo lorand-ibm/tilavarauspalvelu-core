@@ -1,10 +1,13 @@
 from typing import Any
 
+from django.shortcuts import get_object_or_404
 from graphene_permissions.permissions import BasePermission
 from graphql import ResolveInfo
 
 from permissions.helpers import (
     can_create_reservation,
+    can_manage_equipment,
+    can_manage_equipment_categories,
     can_manage_purposes,
     can_manage_resources,
     can_manage_spaces,
@@ -12,6 +15,7 @@ from permissions.helpers import (
     can_manage_units_reservation_units,
     can_view_reservations,
 )
+from reservation_units.models import ReservationUnit
 from reservations.models import Reservation
 from spaces.models import Unit
 
@@ -47,7 +51,15 @@ class ReservationUnitPermission(PrimaryKeyResolvableBasePermission):
 
     @classmethod
     def has_mutation_permission(cls, root: Any, info: ResolveInfo, input: dict) -> bool:
-        unit = Unit.objects.filter(id=input["unit_id"]).first()
+        unit_id = input.get("unit_id")
+        pk = input.get("pk")
+        if not unit_id:
+            unit_id = getattr(
+                ReservationUnit.objects.filter(pk=pk).first(), "unit_id", None
+            )
+        if not unit_id:
+            return False
+        unit = Unit.objects.filter(id=unit_id).first()
         return can_manage_units_reservation_units(info.context.user, unit)
 
 
@@ -106,4 +118,36 @@ class UnitPermission(PrimaryKeyResolvableBasePermission):
 
     @classmethod
     def has_mutation_permission(cls, root: Any, info: ResolveInfo, input: dict) -> bool:
-        return can_manage_units(info.context.user)
+        pk = input.get("pk")
+        unit = get_object_or_404(Unit, pk=pk)
+        return can_manage_units(info.context.user, unit)
+
+
+class KeywordPermission(BasePermission):
+    @classmethod
+    def has_permission(cls, info: ResolveInfo) -> bool:
+        return True
+
+    @classmethod
+    def has_mutation_permission(cls, root: Any, info: ResolveInfo, input: dict) -> bool:
+        return False
+
+
+class EquipmentCategoryPermission(BasePermission):
+    @classmethod
+    def has_permission(self, info: ResolveInfo) -> bool:
+        return True
+
+    @classmethod
+    def has_mutation_permission(cls, root: Any, info: ResolveInfo, input: dict) -> bool:
+        return can_manage_equipment_categories(info.context.user)
+
+
+class EquipmentPermission(BasePermission):
+    @classmethod
+    def has_permission(self, info: ResolveInfo) -> bool:
+        return True
+
+    @classmethod
+    def has_mutation_permission(cls, root: Any, info: ResolveInfo, input: dict) -> bool:
+        return can_manage_equipment(info.context.user)

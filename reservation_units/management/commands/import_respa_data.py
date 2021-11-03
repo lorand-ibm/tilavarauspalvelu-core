@@ -50,28 +50,45 @@ def _delete_existing_data() -> None:
     EquipmentCategory.objects.all().delete()
     Equipment.objects.all().delete()
     ReservationUnit.objects.all().delete()
-    Reservation.objects.all().delete()
-    Period.objects.all().delete()
-    Day.objects.all().delete()
 
 
 # Depends on Unit, District, Building
 def _import_spaces(data: dict, unit_map: dict, save: bool = False) -> dict:
     pk_map = {}
-    space_types = _find_space_types(data)
-    for obj in data["resources"]:
-        if obj["type"] not in space_types:
-            continue
+    for obj in data["spaces"]:
+        # obj:
+        # {
+        #   "pk": 1,
+        #   "name_fi": "Joku tilaresurssi",
+        #   "name_sv": null,
+        #   "name_en": null,
+        #   "unit_id": 1,
+        #   "surface_area": null,
+        #   "max_persons": null,
+        #   "parent": null,
+        #   "code": null,
+        #   "district_id": null,
+        #   "building_id": null,
+        #   "terms_of_use_fi": null,
+        #   "terms_of_use_sv": null,
+        #   "terms_of_use_en": null
+        # }
         instance = Space(
-            name=obj["name"],
-            unit_id=unit_map[obj["unit"]],
-            surface_area=obj["area"],
-            max_persons=obj["people_capacity"],
-            # parent=???,
-            # code=???,
-            # district_id=???,
-            # building_id=???,
-            # terms_of_use=???,
+            name=obj["name_fi"],
+            name_fi=obj["name_fi"],
+            name_sv=obj["name_sv"],
+            name_en=obj["name_en"],
+            unit_id=unit_map[obj["unit_id"]],
+            surface_area=obj["surface_area"],
+            max_persons=obj["max_persons"],
+            parent=obj["parent"],
+            code=obj["code"] or "",
+            district_id=obj["district_id"],
+            building_id=obj["building_id"],
+            terms_of_use=obj["terms_of_use_fi"],
+            terms_of_use_fi=obj["terms_of_use_fi"],
+            terms_of_use_sv=obj["terms_of_use_sv"],
+            terms_of_use_en=obj["terms_of_use_en"],
         )
         if save:
             instance.save()
@@ -80,58 +97,41 @@ def _import_spaces(data: dict, unit_map: dict, save: bool = False) -> dict:
 
 
 def _import_resources(data: dict, save: bool = False) -> dict:
-    non_space_types = _find_non_space_types(data)
     pk_map = {}
     for obj in data["resources"]:
-        if obj["type"] not in non_space_types:
-            continue  # Spaces have their own model
+        # obj:
+        # {
+        #   "pk": 1,
+        #   "name_fi": "Joku esineresurssi",
+        #   "name_sv": "N\u00e5gon itemresurs",
+        #   "name_en": "Some item resource",
+        #   "description_fi": "Suomenkielinen kuvaus",
+        #   "description_sv": "Svenska h\u00e4r",
+        #   "description_en": "English description",
+        #   "is_draft": true,
+        #   "location_type": null,
+        #   "space": null,
+        #   "buffer_time_before": null,
+        #   "buffer_time_after": null
+        # }
+        location_type_map = {
+            "fixed": Resource.LOCATION_FIXED,
+            "movable": Resource.LOCATION_MOVABLE,
+        }
         instance = Resource(
-            name=obj["name"],
-            description=obj["description"],
-            is_draft=not obj["public"],
-            # location_type=???,
-            # space=???,
-            # buffer_time_before=???,
-            # buffer_time_after=???,
-        )
-        if save:
-            instance.save()
-        pk_map[obj["pk"]] = instance.pk
-    return pk_map
-
-
-# Depends on ReservationUnit
-def _import_periods(data: dict, reservation_unit_map: dict, save: bool = False) -> dict:
-    pk_map = {}
-    for obj in data["periods"]:
-        reservation_unit = (
-            reservation_unit_map[obj["resource"]]
-            if obj["resource"] is not None
-            else None
-        )
-        instance = Period(
-            reservation_unit_id=reservation_unit,
-            start=_date_or_none(obj["start"]),
-            end=_date_or_none(obj["end"]),
-            name=obj["name"],
-            description=obj["description"],
-            closed=obj["closed"],
-        )
-        if save:
-            instance.save()
-        pk_map[obj["pk"]] = instance.pk
-    return pk_map
-
-
-# Depends on Period
-def _import_days(data: dict, period_map: dict, save: bool = False) -> dict:
-    pk_map = {}
-    for obj in data["days"]:
-        instance = Day(
-            period_id=period_map[obj["period"]],
-            weekday=obj["weekday"],
-            opens=obj["opens"],
-            closes=obj["closes"],
+            name=obj["name_fi"],
+            name_fi=obj["name_fi"],
+            name_sv=obj["name_sv"],
+            name_en=obj["name_en"],
+            description=obj["description_fi"],
+            description_fi=obj["description_fi"],
+            description_sv=obj["description_sv"],
+            description_en=obj["description_en"],
+            is_draft=obj["is_draft"],
+            location_type=location_type_map[obj["location_type"]],
+            space_id=obj["space"],
+            buffer_time_before=obj["buffer_time_before"],
+            buffer_time_after=obj["buffer_time_after"],
         )
         if save:
             instance.save()
@@ -143,7 +143,19 @@ def _import_days(data: dict, period_map: dict, save: bool = False) -> dict:
 def _import_purposes(data: dict, save: bool = False) -> dict:
     pk_map = {}
     for obj in data["purposes"]:
-        instance = Purpose(name=obj["name"])
+        # obj:
+        # {
+        #   "pk": 1,
+        #   "name_fi": "Joku k\u00e4ytt\u00f6tarkoitus",
+        #   "name_sv": "N\u00e5got purpose",
+        #   "name_en": "Some purpose"
+        # }
+        instance = Purpose(
+            name=obj["name_fi"],
+            name_fi=obj["name_fi"],
+            name_sv=obj["name_sv"],
+            name_en=obj["name_en"],
+        )
         if save:
             instance.save()
         pk_map[obj["pk"]] = instance.pk
@@ -154,14 +166,40 @@ def _import_purposes(data: dict, save: bool = False) -> dict:
 def _import_units(data: dict, save: bool = False) -> dict:
     pk_map = {}
     for obj in data["units"]:
+        # obj:
+        # {
+        #   "pk": 1,
+        #   "tprek_id": "axg26o4luvta",
+        #   "name_fi": "Joku toimipiste",
+        #   "name_sv": "N\u00e5gon enhet",
+        #   "name_en": "Some unit",
+        #   "description_fi": "Joku kuvaus",
+        #   "description_sv": "N\u00e5gon description",
+        #   "description_en": "Some description",
+        #   "web_page": null,
+        #   "email": "manageri@example.com",
+        #   "phone": null,
+        #   "short_description_fi": null,
+        #   "short_description_sv": null,
+        #   "short_description_en": null
+        # }
         instance = Unit(
-            tprek_id=obj["pk"],
-            name=obj["name"],
-            description=obj["description"],
-            web_page=obj["www_url"] if obj["www_url"] is not None else "",
+            tprek_id=obj["tprek_id"],
+            name=obj["name_fi"],
+            name_fi=obj["name_fi"],
+            name_sv=obj["name_sv"],
+            name_en=obj["name_en"],
+            description=obj["description_fi"],
+            description_fi=obj["description_fi"],
+            description_sv=obj["description_sv"],
+            description_en=obj["description_en"],
+            web_page=obj["web_page"] if obj["web_page"] is not None else "",
             email=obj["email"],
             phone=obj["phone"] if obj["phone"] is not None else "",
-            # short_description=???
+            short_description=obj["short_description_fi"] or "",
+            short_description_fi=obj["short_description_fi"] or "",
+            short_description_sv=obj["short_description_sv"] or "",
+            short_description_en=obj["short_description_en"] or "",
         )
         if save:
             instance.save()
@@ -172,9 +210,20 @@ def _import_units(data: dict, save: bool = False) -> dict:
 # No dependencies
 def _import_reservation_unit_types(data: dict, save: bool = False) -> dict:
     pk_map = {}
-    # Here we assume that Respa's ResourceType model corresponds to our ReservationUnitType
-    for obj in data["resource_types"]:
-        instance = ReservationUnitType(name=obj["name"])
+    for obj in data["reservation_unit_types"]:
+        # obj:
+        # {
+        #   "pk": 1,
+        #   "name_fi": "Joku esine",
+        #   "name_sv": "F\u00f6rem\u00e5l",
+        #   "name_en": "Some item"
+        # }
+        instance = ReservationUnitType(
+            name=obj["name_fi"],
+            name_fi=obj["name_fi"],
+            name_sv=obj["name_sv"],
+            name_en=obj["name_en"],
+        )
         if save:
             instance.save()
         pk_map[obj["pk"]] = instance.pk
@@ -193,34 +242,87 @@ def _import_reservation_units(
     save: bool = False,
 ) -> dict:
     pk_map = {}
-    space_types = _find_space_types(data)
-    # Here we assume that Respa's Reservation model corresponds to ReservationUnit
-    for obj in data["resources"]:
+    for obj in data["reservation_units"]:
+        # obj:
+        # {
+        #   "pk": 1,
+        #   "name_fi": "Joku esineresurssi",
+        #   "name_sv": "N\u00e5gon itemresurs",
+        #   "name_en": "Some item resource",
+        #   "description_fi": "Suomenkielinen kuvaus",
+        #   "description_sv": "Svenska h\u00e4r",
+        #   "description_en": "English description",
+        #   "reservation_unit_type_id": 1,
+        #   "unit_id": 1,
+        #   "contact_information_fi": "Yhteyshenkil\u00f6n tiedot",
+        #   "contact_information_sv": "Information av kontaktpersonen",
+        #   "contact_information_en": "Contact person details",
+        #   "is_draft": false,
+        #   "max_persons": 15,
+        #   "surface_area": 2,
+        #   "keyword_groups": null,
+        #   "services": null,
+        #   "require_introduction": null,
+        #   "terms_of_use_fi": null,
+        #   "terms_of_use_sv": null,
+        #   "terms_of_use_en": null,
+        #   "max_reservation_duration": null,
+        #   "min_reservation_duration": null,
+        #   "buffer_time_between_reservations": null,
+        #   "resources": "1",
+        #   "spaces": null,
+        #   "purposes": "1",
+        #   "equipments": "1"
+        # }
         instance = ReservationUnit(
-            name=obj["name"],
-            description=obj["description"],
-            reservation_unit_type_id=reservation_unit_type_map[obj["type"]],
-            unit_id=unit_map[obj["unit"]],
-            contact_information=obj["responsible_contact_info"],
-            is_draft=not obj["public"],
-            max_persons=obj["people_capacity"],
-            surface_area=obj["area"],
-            # keyword_groups=???,
-            # services=???,
-            # require_introduction=???,
-            # terms_of_use=???,
-            # max_reservation_duration=???,
-            # min_reservation_duration=???,
-            # buffer_time_between_reservations=???,
+            name=obj["name_fi"],
+            name_fi=obj["name_fi"],
+            name_sv=obj["name_sv"],
+            name_en=obj["name_en"],
+            description=obj["description_fi"],
+            description_fi=obj["description_fi"],
+            description_sv=obj["description_sv"],
+            description_en=obj["description_en"],
+            reservation_unit_type_id=reservation_unit_type_map[
+                obj["reservation_unit_type_id"]
+            ],
+            unit_id=unit_map[obj["unit_id"]],
+            contact_information=obj["contact_information_fi"],
+            contact_information_fi=obj["contact_information_fi"],
+            contact_information_sv=obj["contact_information_sv"],
+            contact_information_en=obj["contact_information_en"],
+            is_draft=obj["is_draft"],
+            max_persons=obj["max_persons"],
+            surface_area=obj["surface_area"],
+            require_introduction=obj["require_introduction"] or False,
+            terms_of_use=obj["terms_of_use_fi"],
+            terms_of_use_fi=obj["terms_of_use_fi"],
+            terms_of_use_sv=obj["terms_of_use_sv"],
+            terms_of_use_en=obj["terms_of_use_en"],
+            max_reservation_duration=obj["max_reservation_duration"],
+            min_reservation_duration=obj["min_reservation_duration"],
+            buffer_time_between_reservations=obj["buffer_time_between_reservations"],
         )
-        if obj["type"] in space_types:
-            spaces = [space_map[obj["pk"]]]
-            resources = []
-        else:
+        try:
+            spaces = [space_map[int(obj["pk"].strip())]]
+        except AttributeError:
             spaces = []
-            resources = [resource_map[obj["pk"]]]
-        purposes = [purpose_map[pk] for pk in obj["purposes"]]
-        equipments = [equipment_map[pk] for pk in obj["equipment"]]
+        try:
+            resources = [resource_map[int(obj["pk"].strip())]]
+        except AttributeError:
+            resources = []
+        if obj["purposes"]:
+            purposes = [
+                purpose_map[int(pk.strip())] for pk in obj["purposes"].split(",")
+            ]
+        else:
+            purposes = []
+        if obj["equipments"]:
+            equipments = [
+                equipment_map[int(pk.strip())] for pk in obj["equipments"].split(",")
+            ]
+        else:
+            equipments = []
         if save:
             instance.save()
             instance.resources.set(resources)
@@ -231,35 +333,23 @@ def _import_reservation_units(
     return pk_map
 
 
-# Depends on User
-def _import_reservations(
-    data: dict, reservation_unit_map: dict, save: bool = False
-) -> dict:
-    pk_map = {}
-    for obj in data["reservations"]:
-        instance = Reservation(
-            state=obj["state"],
-            begin=_datetime_or_none(obj["begin"]),
-            end=_datetime_or_none(obj["end"]),
-            num_persons=obj["number_of_participants"],
-            # priority=???,
-            # user=???,
-            # buffer_time_before=???,
-            # buffer_time_after=???,
-            # recurring_reservation=???,
-        )
-        if save:
-            instance.save()
-            instance.reservation_unit.set([reservation_unit_map[obj["resource"]]]),
-        pk_map[obj["pk"]] = instance.pk
-    return pk_map
-
-
 # No dependencies
 def _import_equipment_categories(data: dict, save: bool = False) -> dict:
     pk_map = {}
     for obj in data["equipment_categories"]:
-        instance = EquipmentCategory(name=obj["name"])
+        # obj:
+        # {
+        #   "pk": 1,
+        #   "name_fi": "Joku varustekategoria",
+        #   "name_sv": "N\u00e5gon equipmentkategori",
+        #   "name_en": "Some equipment category"
+        # }
+        instance = EquipmentCategory(
+            name=obj["name_fi"],
+            name_fi=obj["name_fi"],
+            name_sv=obj["name_sv"],
+            name_en=obj["name_en"],
+        )
         if save:
             instance.save()
         pk_map[obj["pk"]] = instance.pk
@@ -272,9 +362,20 @@ def _import_equipment(
 ) -> dict:
     pk_map = {}
     for obj in data["equipment"]:
+        # obj:
+        # {
+        #   "pk": 1,
+        #   "name_fi": "Joku varuste",
+        #   "name_sv": null,
+        #   "name_en": "Some equipment",
+        #   "category_id": 1
+        # }
         instance = Equipment(
-            name=obj["name"],
-            category_id=equipment_category_map[obj["category"]],
+            name=obj["name_fi"],
+            name_fi=obj["name_fi"],
+            name_sv=obj["name_sv"],
+            name_en=obj["name_en"],
+            category_id=equipment_category_map[obj["category_id"]],
         )
         if save:
             instance.save()
@@ -295,7 +396,7 @@ def _import_everything(path: str, save: bool = False) -> None:
     equipment_category_map = _import_equipment_categories(json_data, save)
     equipment_map = _import_equipment(json_data, equipment_category_map, save)
 
-    reservation_unit_map = _import_reservation_units(
+    _ = _import_reservation_units(
         json_data,
         space_map,
         resource_map,
@@ -305,37 +406,3 @@ def _import_everything(path: str, save: bool = False) -> None:
         unit_map,
         save,
     )
-
-    _ = _import_reservations(json_data, reservation_unit_map, save)
-
-    period_map = _import_periods(json_data, reservation_unit_map, save)
-    _ = _import_days(json_data, period_map, save)
-
-
-def _date_or_none(datestamp: Optional[str]) -> Optional[date]:
-    return date.fromisoformat(datestamp) if datestamp is not None else None
-
-
-def _datetime_or_none(timestamp: Optional[str]) -> Optional[datetime]:
-    return datetime.fromisoformat(timestamp) if timestamp is not None else None
-
-
-def _find_resource_types(data: dict) -> Iterable[str]:
-    for obj in data["resource_types"]:
-        yield obj["pk"]
-
-
-def _find_space_types(data: dict) -> Iterable[str]:
-    types = set()
-    for obj in data["resource_types"]:
-        if obj["main_type"] == "space":
-            types.add(obj["pk"])
-    return types
-
-
-def _find_non_space_types(data: dict) -> Iterable[str]:
-    types = set()
-    for obj in data["resource_types"]:
-        if obj["main_type"] != "space":
-            types.add(obj["pk"])
-    return types

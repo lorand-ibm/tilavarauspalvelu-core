@@ -205,6 +205,9 @@ env = environ.Env(
     DEFAULT_FROM_EMAIL=(str, django_default_from_email),
     # Tprek
     TPREK_UNIT_URL=(str, "https://www.hel.fi/palvelukarttaws/rest/v4/unit/"),
+    # GDPR API
+    GDPR_API_QUERY_SCOPE=(str, ""),
+    GDPR_API_DELETE_SCOPE=(str, ""),
 )
 
 environ.Env.read_env()
@@ -287,6 +290,11 @@ SEND_RESERVATION_NOTIFICATION_EMAILS = env("SEND_RESERVATION_NOTIFICATION_EMAILS
 
 # TPREK
 TPREK_UNIT_URL = env("TPREK_UNIT_URL")
+
+# GDPR API
+GDPR_API_MODEL = "api.gdpr.ProfileUser"
+GDPR_API_QUERY_SCOPE = env("GDPR_API_QUERY_SCOPE")
+GDPR_API_DELETE_SCOPE = env("GDPR_API_DELETE_SCOPE")
 
 # Configure sentry
 if env("SENTRY_DSN"):
